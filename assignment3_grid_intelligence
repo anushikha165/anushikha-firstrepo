@@ -1,0 +1,918 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyNhcwEe8ciG07OxYThB+fjP",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/anushikha165/anushikha-firstrepo/blob/main/assignment3_grid_intelligence\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "PZvt9jMHw4SK"
+      },
+      "outputs": [],
+      "source": [
+        "import numpy as np\n",
+        "import pandas as pd\n",
+        "import matplotlib.pyplot as plt"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from google.colab import drive"
+      ],
+      "metadata": {
+        "id": "sBFNfJOuyhX5"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "drive.mount('/content/drive')"
+      ],
+      "metadata": {
+        "id": "I7aX5fDaxK12",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "b396aa42-3959-4dad-eec2-30d7c7bedd7c"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Mounted at /content/drive\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df = pd.read_csv('/content/drive/MyDrive/electrical_dataset.csv')"
+      ],
+      "metadata": {
+        "id": "KQb2u1d1xWSG"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(\"Top 5 rows:\")\n",
+        "print(df.head())"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "TLOqsdyADgOw",
+        "outputId": "db2d9176-1a11-4f33-fe0f-01dd62ffb7af"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Top 5 rows:\n",
+            "             Timestamp  Voltage (V)  Current (I)    Power (W)  Power_Factor  \\\n",
+            "0  2024-12-01 00:00:00   222.483571     4.642510   965.023943      0.880626   \n",
+            "1  2024-12-01 00:01:00   219.308678     4.206038   894.158159      0.939144   \n",
+            "2  2024-12-01 00:02:00   223.238443     4.143615          NaN      0.864156   \n",
+            "3  2024-12-01 00:03:00   227.615149     4.188552  1006.917263      0.926711   \n",
+            "4  2024-12-01 00:04:00          NaN     5.165739  1081.262142      0.931754   \n",
+            "\n",
+            "   Temperature (°C)  Humidity (%)  \n",
+            "0         21.734855     45.494834  \n",
+            "1               NaN     46.477508  \n",
+            "2         17.952615     64.195316  \n",
+            "3         19.613098     37.214868  \n",
+            "4         21.783244     55.741660  \n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Display descriptive statistics for all columns\n",
+        "print(\"\\nSummary of the Dataset (Descriptive Statistics):\")\n",
+        "print(df.describe(include='all'))\n",
+        "\n",
+        "# Additional statistics for non-numeric columns (if needed)\n",
+        "print(\"\\nAdditional Details for Non-Numeric Columns:\")\n",
+        "print(df.describe(include=['object']))\n",
+        "\n",
+        "# Median (pandas.describe does not include median by default)\n",
+        "print(\"\\nMedian of Numeric Columns:\")\n",
+        "print(df.median(numeric_only=True))\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "8of-VA77D-Ku",
+        "outputId": "78fd092a-6e92-47b2-92e0-078fd9099aa5"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\n",
+            "Summary of the Dataset (Descriptive Statistics):\n",
+            "                  Timestamp  Voltage (V)  Current (I)    Power (W)  \\\n",
+            "count                 10000  9500.000000  9600.000000  9700.000000   \n",
+            "unique                10000          NaN          NaN          NaN   \n",
+            "top     2024-12-01 00:00:00          NaN          NaN          NaN   \n",
+            "freq                      1          NaN          NaN          NaN   \n",
+            "mean                    NaN   219.992912     5.014070  1102.598216   \n",
+            "std                     NaN     5.007974     0.579586   143.312091   \n",
+            "min                     NaN   200.387999     4.000096   747.956441   \n",
+            "25%                     NaN   216.654181     4.514213   989.925889   \n",
+            "50%                     NaN   219.997444     5.020268  1100.829462   \n",
+            "75%                     NaN   223.348834     5.515116  1207.908605   \n",
+            "max                     NaN   239.631189     5.999850  1498.874098   \n",
+            "\n",
+            "        Power_Factor  Temperature (°C)  Humidity (%)  \n",
+            "count    9800.000000       9700.000000   9600.000000  \n",
+            "unique           NaN               NaN           NaN  \n",
+            "top              NaN               NaN           NaN  \n",
+            "freq             NaN               NaN           NaN  \n",
+            "mean        0.919970         20.003119     50.003748  \n",
+            "std         0.040413          7.363127     11.547591  \n",
+            "min         0.850001          3.005629     30.000337  \n",
+            "25%         0.885059         13.225365     40.117437  \n",
+            "50%         0.920172         20.011891     49.917048  \n",
+            "75%         0.954773         26.657589     60.105216  \n",
+            "max         0.989985         36.151952     69.997588  \n",
+            "\n",
+            "Additional Details for Non-Numeric Columns:\n",
+            "                  Timestamp\n",
+            "count                 10000\n",
+            "unique                10000\n",
+            "top     2024-12-01 00:00:00\n",
+            "freq                      1\n",
+            "\n",
+            "Median of Numeric Columns:\n",
+            "Voltage (V)          219.997444\n",
+            "Current (I)            5.020268\n",
+            "Power (W)           1100.829462\n",
+            "Power_Factor           0.920172\n",
+            "Temperature (°C)      20.011891\n",
+            "Humidity (%)          49.917048\n",
+            "dtype: float64\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "missing_values = df.isnull().sum()\n",
+        "columns_with_missing = missing_values[missing_values > 0]\n",
+        "print(columns_with_missing)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "2D13qCz9EtlH",
+        "outputId": "791fc2e4-7424-46a4-9dd1-7662318092b1"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Voltage (V)         500\n",
+            "Current (I)         400\n",
+            "Power (W)           300\n",
+            "Power_Factor        200\n",
+            "Temperature (°C)    300\n",
+            "Humidity (%)        400\n",
+            "dtype: int64\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "missing_percentage = (missing_values / len(df)) * 100\n",
+        "print(missing_percentage)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "DI_SC_t6EyuG",
+        "outputId": "e5a4d300-dd13-455a-be95-0a3cb711a5da"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Timestamp           0.0\n",
+            "Voltage (V)         5.0\n",
+            "Current (I)         4.0\n",
+            "Power (W)           3.0\n",
+            "Power_Factor        2.0\n",
+            "Temperature (°C)    3.0\n",
+            "Humidity (%)        4.0\n",
+            "dtype: float64\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "numerical_columns = df.select_dtypes(include=['number']).columns\n",
+        "categorical_columns = df.select_dtypes(include=['object']).columns\n",
+        "\n",
+        "\n",
+        "for col in numerical_columns:\n",
+        "    if df[col].skew() > 1:\n",
+        "\n",
+        "        df[col].fillna(df[col].median(), inplace=True)\n",
+        "    else:\n",
+        "        df[col].fillna(df[col].mean(), inplace=True)\n",
+        "for col in categorical_columns:\n",
+        "    df[col].fillna(df[col].mode()[0], inplace=True)\n",
+        "\n",
+        "print(df.isnull().sum())\n",
+        "\n",
+        "df.to_csv('electrical_dataset_imputed.csv', index=False)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "YsNkYvVkFLJr",
+        "outputId": "6049e9ec-7977-411b-ae2f-03448a30edfd"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Timestamp           0\n",
+            "Voltage (V)         0\n",
+            "Current (I)         0\n",
+            "Power (W)           0\n",
+            "Power_Factor        0\n",
+            "Temperature (°C)    0\n",
+            "Humidity (%)        0\n",
+            "dtype: int64\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "<ipython-input-26-b1a57d38194b>:11: FutureWarning: A value is trying to be set on a copy of a DataFrame or Series through chained assignment using an inplace method.\n",
+            "The behavior will change in pandas 3.0. This inplace method will never work because the intermediate object on which we are setting values always behaves as a copy.\n",
+            "\n",
+            "For example, when doing 'df[col].method(value, inplace=True)', try using 'df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) instead, to perform the operation inplace on the original object.\n",
+            "\n",
+            "\n",
+            "  df[col].fillna(df[col].mean(), inplace=True)\n",
+            "<ipython-input-26-b1a57d38194b>:15: FutureWarning: A value is trying to be set on a copy of a DataFrame or Series through chained assignment using an inplace method.\n",
+            "The behavior will change in pandas 3.0. This inplace method will never work because the intermediate object on which we are setting values always behaves as a copy.\n",
+            "\n",
+            "For example, when doing 'df[col].method(value, inplace=True)', try using 'df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) instead, to perform the operation inplace on the original object.\n",
+            "\n",
+            "\n",
+            "  df[col].fillna(df[col].mode()[0], inplace=True)  # Use the mode (most frequent value)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "from sklearn.linear_model import LinearRegression\n",
+        "from sklearn.ensemble import RandomForestRegressor\n",
+        "from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score\n",
+        "import matplotlib.pyplot as plt\n",
+        "import seaborn as sns"
+      ],
+      "metadata": {
+        "id": "PvKLeTLaGW3Y"
+      },
+      "execution_count": 1,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from google.colab import drive"
+      ],
+      "metadata": {
+        "id": "HD0v3ZI0nJf7"
+      },
+      "execution_count": 3,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "drive.mount('/content/drive')"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "CW8uhnaLohCa",
+        "outputId": "2c09b203-51a2-4062-9db1-89ab37b587ba"
+      },
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Mounted at /content/drive\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df = pd.read_csv('/content/drive/MyDrive/electrical_dataset.csv')"
+      ],
+      "metadata": {
+        "id": "-2oio5DMolJc"
+      },
+      "execution_count": 5,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(\"Missing values per column:\\n\", df.isnull().sum())\n",
+        "print(\"\\nDataset Info:\\n\")\n",
+        "print(df.info())"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ZSCEngm2nNCW",
+        "outputId": "80b76576-92bd-4eae-a6d9-c9321e2ce2d0"
+      },
+      "execution_count": 6,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Missing values per column:\n",
+            " Timestamp             0\n",
+            "Voltage (V)         500\n",
+            "Current (I)         400\n",
+            "Power (W)           300\n",
+            "Power_Factor        200\n",
+            "Temperature (°C)    300\n",
+            "Humidity (%)        400\n",
+            "dtype: int64\n",
+            "\n",
+            "Dataset Info:\n",
+            "\n",
+            "<class 'pandas.core.frame.DataFrame'>\n",
+            "RangeIndex: 10000 entries, 0 to 9999\n",
+            "Data columns (total 7 columns):\n",
+            " #   Column            Non-Null Count  Dtype  \n",
+            "---  ------            --------------  -----  \n",
+            " 0   Timestamp         10000 non-null  object \n",
+            " 1   Voltage (V)       9500 non-null   float64\n",
+            " 2   Current (I)       9600 non-null   float64\n",
+            " 3   Power (W)         9700 non-null   float64\n",
+            " 4   Power_Factor      9800 non-null   float64\n",
+            " 5   Temperature (°C)  9700 non-null   float64\n",
+            " 6   Humidity (%)      9600 non-null   float64\n",
+            "dtypes: float64(6), object(1)\n",
+            "memory usage: 547.0+ KB\n",
+            "None\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "target = 'Power (W)'\n",
+        "predictors = ['Voltage (V)', 'Current (I)', 'Temperature', 'Humidity (%)', 'Power_Factor']\n",
+        "\n",
+        "X = df[predictors]\n",
+        "y = df[target]"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 339
+        },
+        "id": "NWPSjOhjnSIQ",
+        "outputId": "38d8c8d1-8d75-4f84-a8e4-c2d1cca81cfc"
+      },
+      "execution_count": 8,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "KeyError",
+          "evalue": "\"['Temperature'] not in index\"",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mKeyError\u001b[0m                                  Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-8-786a9b77ef4d>\u001b[0m in \u001b[0;36m<cell line: 4>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      2\u001b[0m \u001b[0mpredictors\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;34m[\u001b[0m\u001b[0;34m'Voltage (V)'\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m'Current (I)'\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m'Temperature'\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m'Humidity (%)'\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m'Power_Factor'\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      3\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 4\u001b[0;31m \u001b[0mX\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mdf\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0mpredictors\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      5\u001b[0m \u001b[0my\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mdf\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0mtarget\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.10/dist-packages/pandas/core/frame.py\u001b[0m in \u001b[0;36m__getitem__\u001b[0;34m(self, key)\u001b[0m\n\u001b[1;32m   4106\u001b[0m             \u001b[0;32mif\u001b[0m \u001b[0mis_iterator\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mkey\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   4107\u001b[0m                 \u001b[0mkey\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mlist\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mkey\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 4108\u001b[0;31m             \u001b[0mindexer\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mcolumns\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_get_indexer_strict\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mkey\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m\"columns\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;36m1\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m   4109\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   4110\u001b[0m         \u001b[0;31m# take() does not accept boolean indexers\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.10/dist-packages/pandas/core/indexes/base.py\u001b[0m in \u001b[0;36m_get_indexer_strict\u001b[0;34m(self, key, axis_name)\u001b[0m\n\u001b[1;32m   6198\u001b[0m             \u001b[0mkeyarr\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mindexer\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mnew_indexer\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_reindex_non_unique\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mkeyarr\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   6199\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 6200\u001b[0;31m         \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_raise_if_missing\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mkeyarr\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mindexer\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0maxis_name\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m   6201\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   6202\u001b[0m         \u001b[0mkeyarr\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mtake\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mindexer\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.10/dist-packages/pandas/core/indexes/base.py\u001b[0m in \u001b[0;36m_raise_if_missing\u001b[0;34m(self, key, indexer, axis_name)\u001b[0m\n\u001b[1;32m   6250\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   6251\u001b[0m             \u001b[0mnot_found\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mlist\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mensure_index\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mkey\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0mmissing_mask\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mnonzero\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;36m0\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0munique\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 6252\u001b[0;31m             \u001b[0;32mraise\u001b[0m \u001b[0mKeyError\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34mf\"{not_found} not in index\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m   6253\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   6254\u001b[0m     \u001b[0;34m@\u001b[0m\u001b[0moverload\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mKeyError\u001b[0m: \"['Temperature'] not in index\""
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 141
+        },
+        "id": "_kyp29i2nS9Z",
+        "outputId": "547438d5-7ff8-4796-a992-cff1878fe0fa"
+      },
+      "execution_count": 9,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'X' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-9-3ab15314309e>\u001b[0m in \u001b[0;36m<cell line: 1>\u001b[0;34m()\u001b[0m\n\u001b[0;32m----> 1\u001b[0;31m \u001b[0mX_train\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mX_test\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my_train\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my_test\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mtrain_test_split\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mX\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mtest_size\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m0.2\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mrandom_state\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m42\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m: name 'X' is not defined"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(f\"Training set size: {X_train.shape}, {y_train.shape}\")\n",
+        "print(f\"Test set size: {X_test.shape}, {y_test.shape}\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 158
+        },
+        "id": "KyR-hZuHnYZ9",
+        "outputId": "c871cd2e-6851-4239-f847-ccbf2ace185e"
+      },
+      "execution_count": 10,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'X_train' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-10-37ec28727c1c>\u001b[0m in \u001b[0;36m<cell line: 1>\u001b[0;34m()\u001b[0m\n\u001b[0;32m----> 1\u001b[0;31m \u001b[0mprint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34mf\"Training set size: {X_train.shape}, {y_train.shape}\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      2\u001b[0m \u001b[0mprint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34mf\"Test set size: {X_test.shape}, {y_test.shape}\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mNameError\u001b[0m: name 'X_train' is not defined"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "lr_model = LinearRegression()\n",
+        "lr_model.fit(X_train, y_train)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 158
+        },
+        "id": "4WnhIOH5ncUV",
+        "outputId": "6bfcf8a2-6845-4b84-e21f-0d03f8b3b4fe"
+      },
+      "execution_count": 11,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'X_train' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-11-2a64b353c14b>\u001b[0m in \u001b[0;36m<cell line: 2>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      1\u001b[0m \u001b[0mlr_model\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mLinearRegression\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 2\u001b[0;31m \u001b[0mlr_model\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mfit\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mX_train\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my_train\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m: name 'X_train' is not defined"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(\"\\nLinear Regression Coefficients:\\n\", lr_model.coef_)\n",
+        "print(\"Linear Regression Intercept:\", lr_model.intercept_)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 158
+        },
+        "id": "0MwAmewdni_8",
+        "outputId": "dfd1f550-03f1-4870-8ec8-b425e5976f8b"
+      },
+      "execution_count": 12,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "AttributeError",
+          "evalue": "'LinearRegression' object has no attribute 'coef_'",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mAttributeError\u001b[0m                            Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-12-e8c28218419f>\u001b[0m in \u001b[0;36m<cell line: 1>\u001b[0;34m()\u001b[0m\n\u001b[0;32m----> 1\u001b[0;31m \u001b[0mprint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"\\nLinear Regression Coefficients:\\n\"\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mlr_model\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mcoef_\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      2\u001b[0m \u001b[0mprint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"Linear Regression Intercept:\"\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mlr_model\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mintercept_\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mAttributeError\u001b[0m: 'LinearRegression' object has no attribute 'coef_'"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "rf_model = RandomForestRegressor(n_estimators=100, random_state=42)\n",
+        "rf_model.fit(X_train, y_train)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 158
+        },
+        "id": "hWnDOCtInj55",
+        "outputId": "6fabdd85-9569-4c69-cb36-57fd18221454"
+      },
+      "execution_count": 13,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'X_train' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-13-78314f313895>\u001b[0m in \u001b[0;36m<cell line: 2>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      1\u001b[0m \u001b[0mrf_model\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mRandomForestRegressor\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mn_estimators\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m100\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mrandom_state\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m42\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 2\u001b[0;31m \u001b[0mrf_model\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mfit\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mX_train\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my_train\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m: name 'X_train' is not defined"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "y_pred_lr = lr_model.predict(X_test)\n",
+        "y_pred_rf = rf_model.predict(X_test)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 158
+        },
+        "id": "wqOBocPUnnDM",
+        "outputId": "f9fb537c-822d-4d81-96dd-990c1b8d8a48"
+      },
+      "execution_count": 14,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'X_test' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-14-7b5fdeeddbac>\u001b[0m in \u001b[0;36m<cell line: 1>\u001b[0;34m()\u001b[0m\n\u001b[0;32m----> 1\u001b[0;31m \u001b[0my_pred_lr\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mlr_model\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mpredict\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mX_test\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      2\u001b[0m \u001b[0my_pred_rf\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mrf_model\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mpredict\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mX_test\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mNameError\u001b[0m: name 'X_test' is not defined"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "mae_lr = mean_absolute_error(y_test, y_pred_lr)\n",
+        "mse_lr = mean_squared_error(y_test, y_pred_lr)\n",
+        "r2_lr = r2_score(y_test, y_pred_lr)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 176
+        },
+        "id": "fc3wYADJntpm",
+        "outputId": "e268e442-c426-4715-bf80-fcdd2f986458"
+      },
+      "execution_count": 15,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'y_test' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-15-8aa774c70368>\u001b[0m in \u001b[0;36m<cell line: 1>\u001b[0;34m()\u001b[0m\n\u001b[0;32m----> 1\u001b[0;31m \u001b[0mmae_lr\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mmean_absolute_error\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0my_test\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my_pred_lr\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      2\u001b[0m \u001b[0mmse_lr\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mmean_squared_error\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0my_test\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my_pred_lr\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      3\u001b[0m \u001b[0mr2_lr\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mr2_score\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0my_test\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my_pred_lr\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mNameError\u001b[0m: name 'y_test' is not defined"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "mae_rf = mean_absolute_error(y_test, y_pred_rf)\n",
+        "mse_rf = mean_squared_error(y_test, y_pred_rf)\n",
+        "r2_rf = r2_score(y_test, y_pred_rf)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 176
+        },
+        "id": "dmmqprcqnuWA",
+        "outputId": "7bb253c3-da93-498f-d146-479406f6f61c"
+      },
+      "execution_count": 16,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'y_test' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-16-5a8c8703e0d5>\u001b[0m in \u001b[0;36m<cell line: 1>\u001b[0;34m()\u001b[0m\n\u001b[0;32m----> 1\u001b[0;31m \u001b[0mmae_rf\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mmean_absolute_error\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0my_test\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my_pred_rf\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      2\u001b[0m \u001b[0mmse_rf\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mmean_squared_error\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0my_test\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my_pred_rf\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      3\u001b[0m \u001b[0mr2_rf\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mr2_score\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0my_test\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my_pred_rf\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mNameError\u001b[0m: name 'y_test' is not defined"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(\"\\nLinear Regression Performance:\")\n",
+        "print(f\"MAE: {mae_lr:.2f}, MSE: {mse_lr:.2f}, R²: {r2_lr:.2f}\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 193
+        },
+        "id": "dwrv1weJnxde",
+        "outputId": "731e7b3d-df56-4ca2-d4eb-2f24bcf492f7"
+      },
+      "execution_count": 17,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\n",
+            "Linear Regression Performance:\n"
+          ]
+        },
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'mae_lr' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-17-93da4fe7fb1d>\u001b[0m in \u001b[0;36m<cell line: 2>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      1\u001b[0m \u001b[0mprint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"\\nLinear Regression Performance:\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 2\u001b[0;31m \u001b[0mprint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34mf\"MAE: {mae_lr:.2f}, MSE: {mse_lr:.2f}, R²: {r2_lr:.2f}\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m: name 'mae_lr' is not defined"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(\"\\nRandom Forest Regressor Performance:\")\n",
+        "print(f\"MAE: {mae_rf:.2f}, MSE: {mse_rf:.2f}, R²: {r2_rf:.2f}\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 193
+        },
+        "id": "rbV3Kyyxn1de",
+        "outputId": "2dfe94e4-a2e8-4ce3-ec14-215147972fa3"
+      },
+      "execution_count": 19,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\n",
+            "Random Forest Regressor Performance:\n"
+          ]
+        },
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'mae_rf' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-19-0c1ba1a02055>\u001b[0m in \u001b[0;36m<cell line: 2>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      1\u001b[0m \u001b[0mprint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"\\nRandom Forest Regressor Performance:\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 2\u001b[0;31m \u001b[0mprint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34mf\"MAE: {mae_rf:.2f}, MSE: {mse_rf:.2f}, R²: {r2_rf:.2f}\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m: name 'mae_rf' is not defined"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "if r2_rf > r2_lr:\n",
+        "    print(\"\\nRandom Forest performed better than Linear Regression.\")\n",
+        "else:\n",
+        "    print(\"\\nLinear Regression performed better than Random Forest.\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 193
+        },
+        "id": "R0cILzkzn7dU",
+        "outputId": "9ce687aa-7288-4776-9bcd-53a75fcf28cc"
+      },
+      "execution_count": 18,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'r2_rf' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-18-c612bc4b550a>\u001b[0m in \u001b[0;36m<cell line: 1>\u001b[0;34m()\u001b[0m\n\u001b[0;32m----> 1\u001b[0;31m \u001b[0;32mif\u001b[0m \u001b[0mr2_rf\u001b[0m \u001b[0;34m>\u001b[0m \u001b[0mr2_lr\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      2\u001b[0m     \u001b[0mprint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"\\nRandom Forest performed better than Linear Regression.\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      3\u001b[0m \u001b[0;32melse\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      4\u001b[0m     \u001b[0mprint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"\\nLinear Regression performed better than Random Forest.\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mNameError\u001b[0m: name 'r2_rf' is not defined"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "plt.figure(figsize=(10, 6))\n",
+        "plt.scatter(y_test, y_pred_rf, alpha=0.7, color='blue', label='Random Forest')\n",
+        "plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', label='Perfect Fit')\n",
+        "plt.xlabel('Actual Values')\n",
+        "plt.ylabel('Predicted Values')\n",
+        "plt.title('Random Forest: Actual vs Predicted')\n",
+        "plt.legend()\n",
+        "plt.show()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 228
+        },
+        "id": "vdtDmUFon-PD",
+        "outputId": "8bf09dba-bee4-4b45-ab69-71ca7bd52991"
+      },
+      "execution_count": 20,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'y_test' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-20-b52fe6347992>\u001b[0m in \u001b[0;36m<cell line: 2>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      1\u001b[0m \u001b[0mplt\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mfigure\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mfigsize\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;36m10\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m6\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 2\u001b[0;31m \u001b[0mplt\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mscatter\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0my_test\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my_pred_rf\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0malpha\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m0.7\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcolor\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m'blue'\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mlabel\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m'Random Forest'\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      3\u001b[0m \u001b[0mplt\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mplot\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0my_test\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mmin\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my_test\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mmax\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m[\u001b[0m\u001b[0my_test\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mmin\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my_test\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mmax\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m'r--'\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mlabel\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m'Perfect Fit'\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      4\u001b[0m \u001b[0mplt\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mxlabel\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m'Actual Values'\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      5\u001b[0m \u001b[0mplt\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mylabel\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m'Predicted Values'\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mNameError\u001b[0m: name 'y_test' is not defined"
+          ]
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<Figure size 1000x600 with 0 Axes>"
+            ]
+          },
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "residuals_rf = y_test - y_pred_rf\n",
+        "plt.figure(figsize=(10, 6))\n",
+        "sns.histplot(residuals_rf, kde=True, bins=30, color='orange')\n",
+        "plt.title('Residuals Distribution (Random Forest)')\n",
+        "plt.xlabel('Residuals')\n",
+        "plt.ylabel('Frequency')\n",
+        "plt.show()"
+      ],
+      "metadata": {
+        "id": "bfP-_3EJoB2k"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "plt.figure(figsize=(10, 6))\n",
+        "plt.scatter(y_pred_rf, residuals_rf, alpha=0.7, color='green')\n",
+        "plt.axhline(0, color='red', linestyle='--')\n",
+        "plt.title('Residuals Plot (Random Forest)')\n",
+        "plt.xlabel('Predicted Values')\n",
+        "plt.ylabel('Residuals')\n",
+        "plt.show()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 228
+        },
+        "id": "MFRQV4pLoC19",
+        "outputId": "214055a2-4716-45d9-bd75-aefbd706a25a"
+      },
+      "execution_count": 21,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "name 'y_pred_rf' is not defined",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-21-b30c923bfa74>\u001b[0m in \u001b[0;36m<cell line: 2>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      1\u001b[0m \u001b[0mplt\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mfigure\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mfigsize\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;36m10\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m6\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 2\u001b[0;31m \u001b[0mplt\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mscatter\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0my_pred_rf\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mresiduals_rf\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0malpha\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m0.7\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcolor\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m'green'\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      3\u001b[0m \u001b[0mplt\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0maxhline\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;36m0\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcolor\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m'red'\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mlinestyle\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m'--'\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      4\u001b[0m \u001b[0mplt\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mtitle\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m'Residuals Plot (Random Forest)'\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      5\u001b[0m \u001b[0mplt\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mxlabel\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m'Predicted Values'\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mNameError\u001b[0m: name 'y_pred_rf' is not defined"
+          ]
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<Figure size 1000x600 with 0 Axes>"
+            ]
+          },
+          "metadata": {}
+        }
+      ]
+    }
+  ]
+}
