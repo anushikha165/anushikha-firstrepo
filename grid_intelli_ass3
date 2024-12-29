@@ -1,0 +1,593 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyMbWU/wTNgBj8/7eUsK+qDF",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/anushikha165/anushikha-firstrepo/blob/main/grid_intelli_ass3\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "PZvt9jMHw4SK"
+      },
+      "outputs": [],
+      "source": [
+        "import numpy as np\n",
+        "import pandas as pd\n",
+        "import matplotlib.pyplot as plt"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from google.colab import drive"
+      ],
+      "metadata": {
+        "id": "sBFNfJOuyhX5"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "drive.mount('/content/drive')"
+      ],
+      "metadata": {
+        "id": "I7aX5fDaxK12",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "b396aa42-3959-4dad-eec2-30d7c7bedd7c"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Mounted at /content/drive\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df = pd.read_csv('/content/drive/MyDrive/electrical_dataset.csv')"
+      ],
+      "metadata": {
+        "id": "KQb2u1d1xWSG"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(\"Top 5 rows:\")\n",
+        "print(df.head())"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "TLOqsdyADgOw",
+        "outputId": "db2d9176-1a11-4f33-fe0f-01dd62ffb7af"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Top 5 rows:\n",
+            "             Timestamp  Voltage (V)  Current (I)    Power (W)  Power_Factor  \\\n",
+            "0  2024-12-01 00:00:00   222.483571     4.642510   965.023943      0.880626   \n",
+            "1  2024-12-01 00:01:00   219.308678     4.206038   894.158159      0.939144   \n",
+            "2  2024-12-01 00:02:00   223.238443     4.143615          NaN      0.864156   \n",
+            "3  2024-12-01 00:03:00   227.615149     4.188552  1006.917263      0.926711   \n",
+            "4  2024-12-01 00:04:00          NaN     5.165739  1081.262142      0.931754   \n",
+            "\n",
+            "   Temperature (°C)  Humidity (%)  \n",
+            "0         21.734855     45.494834  \n",
+            "1               NaN     46.477508  \n",
+            "2         17.952615     64.195316  \n",
+            "3         19.613098     37.214868  \n",
+            "4         21.783244     55.741660  \n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Display descriptive statistics for all columns\n",
+        "print(\"\\nSummary of the Dataset (Descriptive Statistics):\")\n",
+        "print(df.describe(include='all'))\n",
+        "\n",
+        "# Additional statistics for non-numeric columns (if needed)\n",
+        "print(\"\\nAdditional Details for Non-Numeric Columns:\")\n",
+        "print(df.describe(include=['object']))\n",
+        "\n",
+        "# Median (pandas.describe does not include median by default)\n",
+        "print(\"\\nMedian of Numeric Columns:\")\n",
+        "print(df.median(numeric_only=True))\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "8of-VA77D-Ku",
+        "outputId": "78fd092a-6e92-47b2-92e0-078fd9099aa5"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\n",
+            "Summary of the Dataset (Descriptive Statistics):\n",
+            "                  Timestamp  Voltage (V)  Current (I)    Power (W)  \\\n",
+            "count                 10000  9500.000000  9600.000000  9700.000000   \n",
+            "unique                10000          NaN          NaN          NaN   \n",
+            "top     2024-12-01 00:00:00          NaN          NaN          NaN   \n",
+            "freq                      1          NaN          NaN          NaN   \n",
+            "mean                    NaN   219.992912     5.014070  1102.598216   \n",
+            "std                     NaN     5.007974     0.579586   143.312091   \n",
+            "min                     NaN   200.387999     4.000096   747.956441   \n",
+            "25%                     NaN   216.654181     4.514213   989.925889   \n",
+            "50%                     NaN   219.997444     5.020268  1100.829462   \n",
+            "75%                     NaN   223.348834     5.515116  1207.908605   \n",
+            "max                     NaN   239.631189     5.999850  1498.874098   \n",
+            "\n",
+            "        Power_Factor  Temperature (°C)  Humidity (%)  \n",
+            "count    9800.000000       9700.000000   9600.000000  \n",
+            "unique           NaN               NaN           NaN  \n",
+            "top              NaN               NaN           NaN  \n",
+            "freq             NaN               NaN           NaN  \n",
+            "mean        0.919970         20.003119     50.003748  \n",
+            "std         0.040413          7.363127     11.547591  \n",
+            "min         0.850001          3.005629     30.000337  \n",
+            "25%         0.885059         13.225365     40.117437  \n",
+            "50%         0.920172         20.011891     49.917048  \n",
+            "75%         0.954773         26.657589     60.105216  \n",
+            "max         0.989985         36.151952     69.997588  \n",
+            "\n",
+            "Additional Details for Non-Numeric Columns:\n",
+            "                  Timestamp\n",
+            "count                 10000\n",
+            "unique                10000\n",
+            "top     2024-12-01 00:00:00\n",
+            "freq                      1\n",
+            "\n",
+            "Median of Numeric Columns:\n",
+            "Voltage (V)          219.997444\n",
+            "Current (I)            5.020268\n",
+            "Power (W)           1100.829462\n",
+            "Power_Factor           0.920172\n",
+            "Temperature (°C)      20.011891\n",
+            "Humidity (%)          49.917048\n",
+            "dtype: float64\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "missing_values = df.isnull().sum()\n",
+        "columns_with_missing = missing_values[missing_values > 0]\n",
+        "print(columns_with_missing)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "2D13qCz9EtlH",
+        "outputId": "791fc2e4-7424-46a4-9dd1-7662318092b1"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Voltage (V)         500\n",
+            "Current (I)         400\n",
+            "Power (W)           300\n",
+            "Power_Factor        200\n",
+            "Temperature (°C)    300\n",
+            "Humidity (%)        400\n",
+            "dtype: int64\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "missing_percentage = (missing_values / len(df)) * 100\n",
+        "print(missing_percentage)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "DI_SC_t6EyuG",
+        "outputId": "e5a4d300-dd13-455a-be95-0a3cb711a5da"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Timestamp           0.0\n",
+            "Voltage (V)         5.0\n",
+            "Current (I)         4.0\n",
+            "Power (W)           3.0\n",
+            "Power_Factor        2.0\n",
+            "Temperature (°C)    3.0\n",
+            "Humidity (%)        4.0\n",
+            "dtype: float64\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "numerical_columns = df.select_dtypes(include=['number']).columns\n",
+        "categorical_columns = df.select_dtypes(include=['object']).columns\n",
+        "\n",
+        "\n",
+        "for col in numerical_columns:\n",
+        "    if df[col].skew() > 1:\n",
+        "\n",
+        "        df[col].fillna(df[col].median(), inplace=True)\n",
+        "    else:\n",
+        "        df[col].fillna(df[col].mean(), inplace=True)\n",
+        "for col in categorical_columns:\n",
+        "    df[col].fillna(df[col].mode()[0], inplace=True)\n",
+        "\n",
+        "print(df.isnull().sum())\n",
+        "\n",
+        "df.to_csv('electrical_dataset_imputed.csv', index=False)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "YsNkYvVkFLJr",
+        "outputId": "6049e9ec-7977-411b-ae2f-03448a30edfd"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Timestamp           0\n",
+            "Voltage (V)         0\n",
+            "Current (I)         0\n",
+            "Power (W)           0\n",
+            "Power_Factor        0\n",
+            "Temperature (°C)    0\n",
+            "Humidity (%)        0\n",
+            "dtype: int64\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "<ipython-input-26-b1a57d38194b>:11: FutureWarning: A value is trying to be set on a copy of a DataFrame or Series through chained assignment using an inplace method.\n",
+            "The behavior will change in pandas 3.0. This inplace method will never work because the intermediate object on which we are setting values always behaves as a copy.\n",
+            "\n",
+            "For example, when doing 'df[col].method(value, inplace=True)', try using 'df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) instead, to perform the operation inplace on the original object.\n",
+            "\n",
+            "\n",
+            "  df[col].fillna(df[col].mean(), inplace=True)\n",
+            "<ipython-input-26-b1a57d38194b>:15: FutureWarning: A value is trying to be set on a copy of a DataFrame or Series through chained assignment using an inplace method.\n",
+            "The behavior will change in pandas 3.0. This inplace method will never work because the intermediate object on which we are setting values always behaves as a copy.\n",
+            "\n",
+            "For example, when doing 'df[col].method(value, inplace=True)', try using 'df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) instead, to perform the operation inplace on the original object.\n",
+            "\n",
+            "\n",
+            "  df[col].fillna(df[col].mode()[0], inplace=True)  # Use the mode (most frequent value)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "from sklearn.linear_model import LinearRegression\n",
+        "from sklearn.ensemble import RandomForestRegressor\n",
+        "from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score\n",
+        "import matplotlib.pyplot as plt\n",
+        "import seaborn as sns"
+      ],
+      "metadata": {
+        "id": "PvKLeTLaGW3Y"
+      },
+      "execution_count": 1,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df = pd.read_csv('cleaned_dataset.csv')"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 287
+        },
+        "id": "HD0v3ZI0nJf7",
+        "outputId": "96bc8784-a74d-4caa-a239-34aa3473cd3c"
+      },
+      "execution_count": 2,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "FileNotFoundError",
+          "evalue": "[Errno 2] No such file or directory: 'cleaned_dataset.csv'",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mFileNotFoundError\u001b[0m                         Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-2-a300ac5730a0>\u001b[0m in \u001b[0;36m<cell line: 1>\u001b[0;34m()\u001b[0m\n\u001b[0;32m----> 1\u001b[0;31m \u001b[0mdf\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mpd\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mread_csv\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m'cleaned_dataset.csv'\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
+            "\u001b[0;32m/usr/local/lib/python3.10/dist-packages/pandas/io/parsers/readers.py\u001b[0m in \u001b[0;36mread_csv\u001b[0;34m(filepath_or_buffer, sep, delimiter, header, names, index_col, usecols, dtype, engine, converters, true_values, false_values, skipinitialspace, skiprows, skipfooter, nrows, na_values, keep_default_na, na_filter, verbose, skip_blank_lines, parse_dates, infer_datetime_format, keep_date_col, date_parser, date_format, dayfirst, cache_dates, iterator, chunksize, compression, thousands, decimal, lineterminator, quotechar, quoting, doublequote, escapechar, comment, encoding, encoding_errors, dialect, on_bad_lines, delim_whitespace, low_memory, memory_map, float_precision, storage_options, dtype_backend)\u001b[0m\n\u001b[1;32m   1024\u001b[0m     \u001b[0mkwds\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mupdate\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mkwds_defaults\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1025\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 1026\u001b[0;31m     \u001b[0;32mreturn\u001b[0m \u001b[0m_read\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mfilepath_or_buffer\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mkwds\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m   1027\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1028\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.10/dist-packages/pandas/io/parsers/readers.py\u001b[0m in \u001b[0;36m_read\u001b[0;34m(filepath_or_buffer, kwds)\u001b[0m\n\u001b[1;32m    618\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    619\u001b[0m     \u001b[0;31m# Create the parser.\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 620\u001b[0;31m     \u001b[0mparser\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mTextFileReader\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mfilepath_or_buffer\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m**\u001b[0m\u001b[0mkwds\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    621\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    622\u001b[0m     \u001b[0;32mif\u001b[0m \u001b[0mchunksize\u001b[0m \u001b[0;32mor\u001b[0m \u001b[0miterator\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.10/dist-packages/pandas/io/parsers/readers.py\u001b[0m in \u001b[0;36m__init__\u001b[0;34m(self, f, engine, **kwds)\u001b[0m\n\u001b[1;32m   1618\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1619\u001b[0m         \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mhandles\u001b[0m\u001b[0;34m:\u001b[0m \u001b[0mIOHandles\u001b[0m \u001b[0;34m|\u001b[0m \u001b[0;32mNone\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;32mNone\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 1620\u001b[0;31m         \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_engine\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_make_engine\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mf\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mengine\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m   1621\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1622\u001b[0m     \u001b[0;32mdef\u001b[0m \u001b[0mclose\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;34m->\u001b[0m \u001b[0;32mNone\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.10/dist-packages/pandas/io/parsers/readers.py\u001b[0m in \u001b[0;36m_make_engine\u001b[0;34m(self, f, engine)\u001b[0m\n\u001b[1;32m   1878\u001b[0m                 \u001b[0;32mif\u001b[0m \u001b[0;34m\"b\"\u001b[0m \u001b[0;32mnot\u001b[0m \u001b[0;32min\u001b[0m \u001b[0mmode\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1879\u001b[0m                     \u001b[0mmode\u001b[0m \u001b[0;34m+=\u001b[0m \u001b[0;34m\"b\"\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 1880\u001b[0;31m             self.handles = get_handle(\n\u001b[0m\u001b[1;32m   1881\u001b[0m                 \u001b[0mf\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1882\u001b[0m                 \u001b[0mmode\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.10/dist-packages/pandas/io/common.py\u001b[0m in \u001b[0;36mget_handle\u001b[0;34m(path_or_buf, mode, encoding, compression, memory_map, is_text, errors, storage_options)\u001b[0m\n\u001b[1;32m    871\u001b[0m         \u001b[0;32mif\u001b[0m \u001b[0mioargs\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mencoding\u001b[0m \u001b[0;32mand\u001b[0m \u001b[0;34m\"b\"\u001b[0m \u001b[0;32mnot\u001b[0m \u001b[0;32min\u001b[0m \u001b[0mioargs\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mmode\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    872\u001b[0m             \u001b[0;31m# Encoding\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 873\u001b[0;31m             handle = open(\n\u001b[0m\u001b[1;32m    874\u001b[0m                 \u001b[0mhandle\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    875\u001b[0m                 \u001b[0mioargs\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mmode\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mFileNotFoundError\u001b[0m: [Errno 2] No such file or directory: 'cleaned_dataset.csv'"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(\"Missing values per column:\\n\", df.isnull().sum())\n",
+        "print(\"\\nDataset Info:\\n\")\n",
+        "print(df.info())"
+      ],
+      "metadata": {
+        "id": "ZSCEngm2nNCW"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "target = 'Power (W)'\n",
+        "predictors = ['Voltage (V)', 'Current (I)', 'Temperature', 'Humidity (%)', 'Power_Factor']\n",
+        "\n",
+        "X = df[predictors]\n",
+        "y = df[target]"
+      ],
+      "metadata": {
+        "id": "NWPSjOhjnSIQ"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)"
+      ],
+      "metadata": {
+        "id": "_kyp29i2nS9Z"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(f\"Training set size: {X_train.shape}, {y_train.shape}\")\n",
+        "print(f\"Test set size: {X_test.shape}, {y_test.shape}\")"
+      ],
+      "metadata": {
+        "id": "KyR-hZuHnYZ9"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "lr_model = LinearRegression()\n",
+        "lr_model.fit(X_train, y_train)"
+      ],
+      "metadata": {
+        "id": "4WnhIOH5ncUV"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(\"\\nLinear Regression Coefficients:\\n\", lr_model.coef_)\n",
+        "print(\"Linear Regression Intercept:\", lr_model.intercept_)"
+      ],
+      "metadata": {
+        "id": "0MwAmewdni_8"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "rf_model = RandomForestRegressor(n_estimators=100, random_state=42)\n",
+        "rf_model.fit(X_train, y_train)"
+      ],
+      "metadata": {
+        "id": "hWnDOCtInj55"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "y_pred_lr = lr_model.predict(X_test)\n",
+        "y_pred_rf = rf_model.predict(X_test)"
+      ],
+      "metadata": {
+        "id": "wqOBocPUnnDM"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "mae_lr = mean_absolute_error(y_test, y_pred_lr)\n",
+        "mse_lr = mean_squared_error(y_test, y_pred_lr)\n",
+        "r2_lr = r2_score(y_test, y_pred_lr)"
+      ],
+      "metadata": {
+        "id": "fc3wYADJntpm"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "mae_rf = mean_absolute_error(y_test, y_pred_rf)\n",
+        "mse_rf = mean_squared_error(y_test, y_pred_rf)\n",
+        "r2_rf = r2_score(y_test, y_pred_rf)"
+      ],
+      "metadata": {
+        "id": "dmmqprcqnuWA"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(\"\\nLinear Regression Performance:\")\n",
+        "print(f\"MAE: {mae_lr:.2f}, MSE: {mse_lr:.2f}, R²: {r2_lr:.2f}\")"
+      ],
+      "metadata": {
+        "id": "dwrv1weJnxde"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(\"\\nRandom Forest Regressor Performance:\")\n",
+        "print(f\"MAE: {mae_rf:.2f}, MSE: {mse_rf:.2f}, R²: {r2_rf:.2f}\")"
+      ],
+      "metadata": {
+        "id": "rbV3Kyyxn1de"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "if r2_rf > r2_lr:\n",
+        "    print(\"\\nRandom Forest performed better than Linear Regression.\")\n",
+        "else:\n",
+        "    print(\"\\nLinear Regression performed better than Random Forest.\")"
+      ],
+      "metadata": {
+        "id": "R0cILzkzn7dU"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "plt.figure(figsize=(10, 6))\n",
+        "plt.scatter(y_test, y_pred_rf, alpha=0.7, color='blue', label='Random Forest')\n",
+        "plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', label='Perfect Fit')\n",
+        "plt.xlabel('Actual Values')\n",
+        "plt.ylabel('Predicted Values')\n",
+        "plt.title('Random Forest: Actual vs Predicted')\n",
+        "plt.legend()\n",
+        "plt.show()"
+      ],
+      "metadata": {
+        "id": "vdtDmUFon-PD"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "residuals_rf = y_test - y_pred_rf\n",
+        "plt.figure(figsize=(10, 6))\n",
+        "sns.histplot(residuals_rf, kde=True, bins=30, color='orange')\n",
+        "plt.title('Residuals Distribution (Random Forest)')\n",
+        "plt.xlabel('Residuals')\n",
+        "plt.ylabel('Frequency')\n",
+        "plt.show()"
+      ],
+      "metadata": {
+        "id": "bfP-_3EJoB2k"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "plt.figure(figsize=(10, 6))\n",
+        "plt.scatter(y_pred_rf, residuals_rf, alpha=0.7, color='green')\n",
+        "plt.axhline(0, color='red', linestyle='--')\n",
+        "plt.title('Residuals Plot (Random Forest)')\n",
+        "plt.xlabel('Predicted Values')\n",
+        "plt.ylabel('Residuals')\n",
+        "plt.show()"
+      ],
+      "metadata": {
+        "id": "MFRQV4pLoC19"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
